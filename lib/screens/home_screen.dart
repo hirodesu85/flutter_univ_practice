@@ -9,10 +9,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final List<String> _firebaseDataList = [];
+
   void _fetchFirebaseData() async {
     await FirebaseFirestore.instance.collection("posts").get().then((event) {
       for (var doc in event.docs) {
-        print("${doc.id} => ${doc.data()}");
+        setState(() {
+          final text = doc.data()["text"];
+          _firebaseDataList.add(text);
+        });
       }
     });
   }
@@ -22,18 +27,17 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("FireStore Practice"),
+        backgroundColor: Colors.blue,
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Firestoreのデータを取得する",
-            ),
-            Text(
-              'データを取得するボタンを押してください',
-            ),
-          ],
+      body: Center(
+        child: ListView.builder(
+          itemCount: _firebaseDataList.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              leading: const Icon(Icons.person),
+              title: Text(_firebaseDataList[index]),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
