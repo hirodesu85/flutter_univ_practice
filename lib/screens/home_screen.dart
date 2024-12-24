@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_univ_practice/models/post.dart';
+import 'package:flutter_univ_practice/screens/form_screen.dart';
+import 'package:flutter_univ_practice/screens/update_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<String> _firebaseDataList = [];
+  final List<Post> _firebaseDataList = [];
 
   @override
   void initState() {
@@ -26,16 +29,14 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _firebaseDataList.clear();
         event.docs.forEach((element) {
-          _firebaseDataList.add(element.data()["text"]);
+          _firebaseDataList.add(Post(
+            id: element.id,
+            text: element["text"],
+            createdAt: element["createdAt"].toDate(),
+            updatedAt: element["updatedAt"].toDate(),
+          ));
         });
       });
-    });
-  }
-
-  Future _addFirebaseData() async {
-    await FirebaseFirestore.instance.collection("posts").add({
-      "text": "テスト投稿1",
-      "createdAt": Timestamp.now(),
     });
   }
 
@@ -51,15 +52,29 @@ class _HomeScreenState extends State<HomeScreen> {
           itemCount: _firebaseDataList.length,
           itemBuilder: (context, index) {
             return ListTile(
+              onTap: () async {
+                // 画面遷移
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          UpdateScreen(_firebaseDataList[index])),
+                );
+                await _fetchFirebaseData();
+              },
               leading: const Icon(Icons.person),
-              title: Text(_firebaseDataList[index]),
+              title: Text(_firebaseDataList[index].text),
             );
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await _addFirebaseData();
+          // 画面遷移
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FormScreen()),
+          );
           await _fetchFirebaseData();
         },
         tooltip: 'Add',
