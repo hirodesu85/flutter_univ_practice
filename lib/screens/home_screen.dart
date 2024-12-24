@@ -40,6 +40,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future _deleteFirebaseData(String id) async {
+    await FirebaseFirestore.instance.collection("posts").doc(id).delete();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,6 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               leading: const Icon(Icons.person),
               title: Text(_firebaseDataList[index].text),
+              trailing: IconButton(
+                  onPressed: () async {
+                    await _deleteFirebaseData(_firebaseDataList[index].id);
+                    await _fetchFirebaseData();
+                  },
+                  icon: const Icon(Icons.delete)),
             );
           },
         ),
