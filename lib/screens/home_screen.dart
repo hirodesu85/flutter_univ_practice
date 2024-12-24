@@ -11,14 +11,31 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<String> _firebaseDataList = [];
 
-  void _fetchFirebaseData() async {
-    await FirebaseFirestore.instance.collection("posts").get().then((event) {
-      for (var doc in event.docs) {
-        setState(() {
-          final text = doc.data()["text"];
-          _firebaseDataList.add(text);
+  @override
+  void initState() {
+    super.initState();
+    _fetchFirebaseData();
+  }
+
+  Future _fetchFirebaseData() async {
+    await FirebaseFirestore.instance
+        .collection("posts")
+        .orderBy('createdAt', descending: true)
+        .get()
+        .then((event) {
+      setState(() {
+        _firebaseDataList.clear();
+        event.docs.forEach((element) {
+          _firebaseDataList.add(element.data()["text"]);
         });
-      }
+      });
+    });
+  }
+
+  Future _addFirebaseData() async {
+    await FirebaseFirestore.instance.collection("posts").add({
+      "text": "テスト投稿1",
+      "createdAt": Timestamp.now(),
     });
   }
 
@@ -41,8 +58,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _fetchFirebaseData,
-        tooltip: 'Fetch Firebase Data',
+        onPressed: () async {
+          await _addFirebaseData();
+          await _fetchFirebaseData();
+        },
+        tooltip: 'Add',
         child: const Icon(Icons.add),
       ),
     );
