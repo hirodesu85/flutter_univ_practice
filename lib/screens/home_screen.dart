@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_univ_practice/models/post.dart';
 import 'package:flutter_univ_practice/screens/form_screen.dart';
+import 'package:flutter_univ_practice/screens/lobby_screen.dart';
 import 'package:flutter_univ_practice/screens/update_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -50,6 +52,19 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text("FireStore Practice"),
         backgroundColor: Colors.blue,
+        actions: [
+          // ログアウトボタン
+          IconButton(
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LobbyScreen()),
+                  (route) => false);
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
       ),
       body: Center(
         child: ListView.builder(
